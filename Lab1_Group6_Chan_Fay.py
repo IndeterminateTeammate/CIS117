@@ -23,10 +23,8 @@ def guessing_game():
     the number of tries remaining. If the user fails to guess correctly, the
     correct number is revealed. The user can choose to play again.
     
-    Author: [Your Name]
+    Author: Fay
     
-    Returns:
-        None (function handles all game interaction)
     """
     while True:  # Main game loop for playing multiple rounds
         # Generate random number between 1 and 100
@@ -39,7 +37,7 @@ def guessing_game():
         # Game round loop
         while tries_left > 0:
             try:
-                # Get user's guess
+                # User input 
                 if tries_left == max_tries:
                     guess = int(input(f"Guess what it is. You have {tries_left} tries: "))
                 else:
@@ -61,7 +59,7 @@ def guessing_game():
                 
                 tries_left -= 1
                 
-                # Check if out of tries
+                # Tries remaining
                 if tries_left == 0:
                     print(f"\nNope! You lost. The number was {secret_number}")
                     
@@ -92,21 +90,19 @@ def rock_paper_scissors():
     - Scissors (2) beats Paper (1)
     - Paper (1) beats Rock (3)
     
-    Author: [Partner's Name]
-    
-    Returns:
-        None (function handles all game interaction)
+    Author: Chan
+   
     """
-    # Define choices for display
+    # Options displayed
     choices = {1: "paper", 2: "scissors", 3: "rock"}
     
-    while True:  # Main game loop for playing multiple rounds
-        # Get computer's choice
+    while True:  # Game loops until user decides to quit
+        # Computers selection
         computer_choice = random.randint(1, 3)
         
         print("\n--- Rock-Paper-Scissors Game ---")
         
-        # Get user's choice with validation
+        # Users selection
         while True:
             try:
                 user_choice = int(input("Enter your choice: 1. paper, 2. scissors, 3. rock: "))
@@ -171,7 +167,7 @@ def main():
         print("3. Escape the program")
         print("-" * 30)
 
-        # Get user's choice with validation
+        # Get user's choice and validate input
         try:
             choice = int(input("Which game do you want to play? (1-3): "))
             
@@ -204,9 +200,9 @@ if __name__ == "__main__":
     # print("\n" + "="*50)
     # print("TESTING INDIVIDUAL GAMES")
     # print("="*50)
-    # 
+     
     # print("\nTesting Guessing Game:")
     # guessing_game()
-    # 
+     
     # print("\nTesting Rock-Paper-Scissors:")
     # rock_paper_scissors()
