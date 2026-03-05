@@ -1,0 +1,6 @@
+print("What is your name? ")
+name = input()
+print("What do you like? ")
+like = input()
+print()
+print(name, "likes", like)
