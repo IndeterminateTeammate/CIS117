@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gutenberg Word Frequency Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .results.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .word-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .word-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .word {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .frequency {
+            color: #667eea;
+            font-weight: 700;
+            background: #e8eaff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #c33;
+        }
+        
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3c3;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .info-text {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.7em;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        hr {
+            margin: 15px 0;
+            border: none;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        @media (max-width: 768px) {
+            .card {
+                padding: 20px;
+            }
+            .word-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Project Gutenberg Word Frequency Tool</h1>
+            <p>Search any book - automatically finds, analyzes, and saves top 10 meaningful words</p>
+        </div>
+        
+        <!-- API Search Section - MAIN FEATURE (uses WWW API) -->
+        <div class="card">
+            <h2>🔍 Search Any Book by Title <span class="badge">USES WWW API</span></h2>
+            <p style="color: #666; margin-bottom: 15px;">Enter any book title - the app will automatically search Project Gutenberg's API, fetch the book, and analyze it!</p>
+            <div class="input-group">
+                <label for="apiSearchTitle">Book Title:</label>
+                <input type="text" id="apiSearchTitle" placeholder="e.g., Pride and Prejudice, Moby Dick, Frankenstein, The Great Gatsby">
+            </div>
+            <button onclick="searchByTitleAPI()">🔎 Search Gutenberg API & Fetch Book</button>
+            <div id="apiResults" class="results"></div>
+        </div>
+        
+        <!-- Search Local Database Section -->
+        <div class="card">
+            <h2>💾 Search Local Database</h2>
+            <p style="color: #666; margin-bottom: 15px;">Quickly retrieve previously searched books from your local database.</p>
+            <div class="input-group">
+                <label for="searchTitle">Book Title:</label>
+                <input type="text" id="searchTitle" placeholder="Enter a book title you've already searched">
+            </div>
+            <button onclick="searchLocal()">📖 Search Local Database</button>
+            <div id="searchResults" class="results"></div>
+        </div>
+        
+        <!-- Manual URL Section (Backup) -->
+        <div class="card">
+            <h2>🔗 Manual URL Entry <span class="badge">Backup Method</span></h2>
+            <p style="color: #666; margin-bottom: 15px;">If the API can't find your book, you can manually enter a Gutenberg URL.</p>
+            <div class="input-group">
+                <label for="manualTitle">Book Title:</label>
+                <input type="text" id="manualTitle" placeholder="Book title">
+            </div>
+            <div class="input-group">
+                <label for="manualUrl">Project Gutenberg URL (.txt format):</label>
+                <input type="text" id="manualUrl" placeholder="https://www.gutenberg.org/cache/epub/514/pg514.txt">
+                <div class="info-text">💡 Tip: Find .txt files on Gutenberg - look for "Plain Text UTF-8" download option</div>
+            </div>
+            <button onclick="fetchManual()">📥 Fetch & Save from URL</button>
+            <div id="manualResults" class="results"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Function 1: Search by Title using WWW API (MAIN FEATURE)
+        async function searchByTitleAPI() {
+            const title = document.getElementById('apiSearchTitle').value.trim();
+            const resultsDiv = document.getElementById('apiResults');
+            
+            if (!title) {
+                showError(resultsDiv, 'Please enter a book title');
+                return;
+            }
+            
+            showLoading(resultsDiv, 'Searching Gutenberg API and fetching book... This may take 10-20 seconds...');
+            
+            try {
+                const response = await fetch('/api/search-api/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title: title})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(resultsDiv, data.title, data.words, 
+                        `✅ Found via API! (Book ID: ${data.book_id})<br>Saved to database for future searches.`);
+                } else if (data.error) {
+                    showError(resultsDiv, data.error);
+                } else {
+                    showError(resultsDiv, 'Book not found. Try another title or use Manual URL Entry.');
+                }
+            } catch (error) {
+                showError(resultsDiv, 'Error: ' + error.message);
+            }
+        }
+        
+        // Function 2: Search Local Database
+        async function searchLocal() {
+            const title = document.getElementById('searchTitle').value.trim();
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!title) {
+                showError(resultsDiv, 'Please enter a book title');
+                return;
+            }
+            
+            showLoading(resultsDiv, 'Searching local database...');
+            
+            try {
+                const response = await fetch('/api/search-local/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title: title})
+                });
+                
+                const data = await response.json();
+                
+                if (data.found) {
+                    displayResults(resultsDiv, data.title, data.words, 
+                        '📀 Retrieved from local database (cached)');
+                } else if (data.message) {
+                    showError(resultsDiv, data.message + ' Try searching by title using the API above!');
+                } else {
+                    showError(resultsDiv, 'Book not found in local database. Use the API search above first.');
+                }
+            } catch (error) {
+                showError(resultsDiv, 'Error: ' + error.message);
+            }
+        }
+        
+        // Function 3: Manual URL Entry (Backup)
+        async function fetchManual() {
+            const title = document.getElementById('manualTitle').value.trim();
+            const url = document.getElementById('manualUrl').value.trim();
+            const resultsDiv = document.getElementById('manualResults');
+            
+            if (!title || !url) {
+                showError(resultsDiv, 'Please enter both book title and URL');
+                return;
+            }
+            
+            showLoading(resultsDiv, 'Fetching book from URL...');
+            
+            try {
+                const response = await fetch('/api/fetch-manual/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title: title, url: url})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(resultsDiv, data.title, data.words, 
+                        '📥 Fetched from manual URL and saved to database');
+                } else if (data.error) {
+                    showError(resultsDiv, data.error);
+                } else {
+                    showError(resultsDiv, 'Failed to fetch book. Check the URL and try again.');
+                }
+            } catch (error) {
+                showError(resultsDiv, 'Error: ' + error.message);
+            }
+        }
+        
+        // Helper Functions
+        function displayResults(container, title, words, sourceMessage) {
+            if (!words || words.length === 0) {
+                showError(container, 'No meaningful words found in this book.');
+                return;
+            }
+            
+            container.innerHTML = `
+                <h3>📖 Top 10 Meaningful Words in "${title}"</h3>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">${sourceMessage}</p>
+                <div class="word-list">
+                    ${words.map((item, index) => `
+                        <div class="word-item">
+                            <span class="word">${index + 1}. ${escapeHtml(item.word)}</span>
+                            <span class="frequency">${item.frequency} times</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.classList.add('active');
+        }
+        
+        function showError(container, message) {
+            container.innerHTML = `<div class="error">❌ ${escapeHtml(message)}</div>`;
+            container.classList.add('active');
+        }
+        
+        function showLoading(container, message) {
+            container.innerHTML = `<div class="loading">⏳ ${escapeHtml(message)}</div>`;
+            container.classList.add('active');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
